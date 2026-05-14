@@ -19,7 +19,6 @@ classes/
 # vscode
 
 .settings/
-.vscode/
 bin/
 .classpath
 .project
@@ -31,6 +30,10 @@ bin/
 # fabric
 
 run/
+
+# claude
+
+.claude/
 
 # java
 
