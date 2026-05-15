@@ -10,6 +10,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -70,6 +72,8 @@ public class PiglinAiMixin {
         if (ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.contains(entity.getUUID())) {
             entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, 269L);
             entity.level().broadcastEntityEvent(entity, (byte) 16);
+            entity.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 229, 1));
+            entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 269, 0));
             ci.cancel();
             // isConverting() is overridden in AbstractPiglinMixin to drive the shake renderer
         } else if (ArmorAura.SNOUT_EXTRA_LUCKY_PIGLINS.contains(entity.getUUID())) {
