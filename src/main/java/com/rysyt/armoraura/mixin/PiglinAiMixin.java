@@ -122,7 +122,7 @@ public class PiglinAiMixin {
     // Returns a random rare item as a guaranteed bonus drop.
     private static ItemStack randomRareItem() {
         Random rng = new Random();
-        return switch (rng.nextInt(5)) {
+        return switch (rng.nextInt(7)) {
             case 0 -> new ItemStack(Items.ENDER_PEARL, 2 + rng.nextInt(3));
             case 1 -> {
                 ItemStack s = new ItemStack(Items.POTION);
@@ -131,7 +131,9 @@ public class PiglinAiMixin {
             }
             case 2 -> new ItemStack(Items.DRIED_GHAST, 1);
             case 3 -> new ItemStack(Items.DIAMOND, 1 + rng.nextInt(2));
-            default -> new ItemStack(Items.IRON_NUGGET, 10 + rng.nextInt(10));
+            case 4 -> new ItemStack(Items.ENCHANTED_GOLDEN_APPLE, 1);
+            case 5 -> new ItemStack(Items.DIAMOND_BLOCK, 1 + rng.nextInt(2));
+            default -> new ItemStack(Items.IRON_BLOCK, 10 + rng.nextInt(10));
         };
     }
 }

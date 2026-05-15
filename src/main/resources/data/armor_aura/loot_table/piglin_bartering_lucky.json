@@ -35,7 +35,7 @@
             }
           ],
           "name": "minecraft:potion",
-          "weight": 10
+          "weight": 3
         },
         {
           "type": "minecraft:item",
@@ -46,7 +46,19 @@
             }
           ],
           "name": "minecraft:splash_potion",
-          "weight": 10
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "add": false,
+              "count": 1.0,
+              "function": "minecraft:set_count"
+            }
+          ],
+          "name": "minecraft:enchanted_golden_apple",
+          "weight": 1
         },
         {
           "type": "minecraft:item",
