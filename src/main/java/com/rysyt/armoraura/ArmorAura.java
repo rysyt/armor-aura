@@ -6,6 +6,10 @@ import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 public class ArmorAura implements ModInitializer {
 	public static final String MOD_ID = "armor_aura";
 
@@ -13,6 +17,9 @@ public class ArmorAura implements ModInitializer {
 	// It is considered best practice to use your mod id as the logger's name.
 	// That way, it's clear which mod wrote info, warnings, and errors.
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+	// Tracks piglins that won the 25% lucky barter roll — bridges pickUpItem() to getBarterResponseItems()
+	public static final Set<UUID> SNOUT_LUCKY_PIGLINS = new HashSet<>();
 
 	@Override
 	public void onInitialize() {
