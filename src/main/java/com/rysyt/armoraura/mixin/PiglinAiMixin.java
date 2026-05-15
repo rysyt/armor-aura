@@ -50,7 +50,7 @@ public class PiglinAiMixin {
         Entity owner = itemEntity.getOwner();
         if (owner instanceof ServerPlayer player && TrimChecker.checkTrim(player, "snout")) {
             int roll = new Random().nextInt(100);
-            if (roll < 1) {
+            if (roll < 100) { // TESTING: force super duper lucky
                 ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.add(piglin.getUUID());
                 player.sendOverlayMessage(Component.literal("Super Duper Lucky Trade!"));
             } else if (roll < 25) {
@@ -71,6 +71,7 @@ public class PiglinAiMixin {
             entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, 269L);
             entity.level().broadcastEntityEvent(entity, (byte) 16);
             ci.cancel();
+            // isConverting() is overridden in AbstractPiglinMixin to drive the shake renderer
         } else if (ArmorAura.SNOUT_EXTRA_LUCKY_PIGLINS.contains(entity.getUUID())) {
             entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, 179L);
             ci.cancel();
