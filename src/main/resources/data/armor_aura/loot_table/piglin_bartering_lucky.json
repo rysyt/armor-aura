@@ -13,7 +13,7 @@
             }
           ],
           "name": "minecraft:book",
-          "weight": 20
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -24,7 +24,7 @@
             }
           ],
           "name": "minecraft:iron_boots",
-          "weight": 20
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -35,7 +35,7 @@
             }
           ],
           "name": "minecraft:potion",
-          "weight": 20
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -46,7 +46,7 @@
             }
           ],
           "name": "minecraft:splash_potion",
-          "weight": 20
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -57,7 +57,7 @@
             }
           ],
           "name": "minecraft:potion",
-          "weight": 20
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -73,7 +73,7 @@
             }
           ],
           "name": "minecraft:iron_nugget",
-          "weight": 20
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -89,7 +89,7 @@
             }
           ],
           "name": "minecraft:ender_pearl",
-          "weight": 20
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -101,23 +101,7 @@
             }
           ],
           "name": "minecraft:dried_ghast",
-          "weight": 20
-        },
-        {
-          "type": "minecraft:item",
-          "functions": [
-            {
-              "add": false,
-              "count": {
-                "type": "minecraft:uniform",
-                "max": 4.0,
-                "min": 3.0
-              },
-              "function": "minecraft:set_count"
-            }
-          ],
-          "name": "minecraft:diamond",
-          "weight": 5
+          "weight": 10
         },
         {
           "type": "minecraft:item",
@@ -197,5 +181,5 @@
       "rolls": 1.0
     }
   ],
-  "random_sequence": "armor_aura:gameplay/piglin_bartering_snout"
+  "random_sequence": "armor_aura:gameplay/piglin_bartering_lucky"
 }
