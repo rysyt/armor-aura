@@ -52,7 +52,7 @@ public class PiglinAiMixin {
         Entity owner = itemEntity.getOwner();
         if (owner instanceof ServerPlayer player && TrimChecker.checkTrim(player, "snout")) {
             int roll = new Random().nextInt(100);
-            if (roll < 100) { // TESTING: force super duper lucky
+            if (roll < 1) {
                 ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.add(piglin.getUUID());
                 player.sendOverlayMessage(Component.literal("Super Duper Lucky Trade!"));
             } else if (roll < 25) {
@@ -74,6 +74,13 @@ public class PiglinAiMixin {
             entity.level().broadcastEntityEvent(entity, (byte) 16);
             entity.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 229, 1));
             entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 269, 0));
+            // Pre-roll drops now — piglin will likely land before admiration ends so getBarterResponseItems may never fire
+            List<ItemStack> drops = new ArrayList<>();
+            for (int i = 0; i < 5; i++) {
+                drops.addAll(rollSnoutTable((Piglin) entity));
+                drops.add(randomRareItem());
+            }
+            ArmorAura.SNOUT_SUPER_LUCKY_DROPS.put(entity.getUUID(), drops);
             ci.cancel();
             // isConverting() is overridden in AbstractPiglinMixin to drive the shake renderer
         } else if (ArmorAura.SNOUT_EXTRA_LUCKY_PIGLINS.contains(entity.getUUID())) {
@@ -87,14 +94,8 @@ public class PiglinAiMixin {
     @Inject(method = "getBarterResponseItems", at = @At("HEAD"), cancellable = true)
     private static void tieredBarterItems(Piglin piglin, CallbackInfoReturnable<List<ItemStack>> cir) {
         if (ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.remove(piglin.getUUID())) {
-            List<ItemStack> items = new ArrayList<>();
-            for (int i = 0; i < 5; i++) {
-                items.addAll(rollSnoutTable(piglin));
-                items.add(randomRareItem());
-            }
-            cir.setReturnValue(items);
-            // Schedule death for next tick so items are thrown before the piglin dies
-            piglin.level().getServer().execute(() -> piglin.kill((ServerLevel) piglin.level()));
+            // Items pre-rolled at admiration start and stored for death drop — suppress the throw
+            cir.setReturnValue(List.of());
 
         } else if (ArmorAura.SNOUT_EXTRA_LUCKY_PIGLINS.remove(piglin.getUUID())) {
             List<ItemStack> items = new ArrayList<>(rollSnoutTable(piglin));
