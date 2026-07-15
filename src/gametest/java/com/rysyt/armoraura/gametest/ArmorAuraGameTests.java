@@ -1,5 +1,6 @@
 package com.rysyt.armoraura.gametest;
 
+import com.rysyt.armoraura.ArmorAuraAttachments;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -10,6 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -47,6 +49,42 @@ public class ArmorAuraGameTests {
 					"piglin ignored a player with no gold and no snout trim");
 			helper.succeed();
 		});
+	}
+
+	@GameTest(maxTicks = 400)
+	public void goldPickupSetsTierAttachment(GameTestHelper helper) {
+		ServerPlayer player = spawnPlayer(helper, true);
+		Piglin piglin = spawnPiglin(helper);
+		throwGold(helper, player);
+		helper.succeedWhen(() -> helper.assertTrue(
+				piglin.hasAttached(ArmorAuraAttachments.SNOUT_TIER),
+				"piglin picked up a snout trim wearer's gold but got no tier attachment"));
+	}
+
+	@GameTest(maxTicks = 600)
+	public void tierAttachmentClearsWhenTradeResolves(GameTestHelper helper) {
+		ServerPlayer player = spawnPlayer(helper, true);
+		Piglin piglin = spawnPiglin(helper);
+		throwGold(helper, player);
+		boolean[] sawTier = new boolean[1];
+		helper.onEachTick(() -> {
+			if (piglin.hasAttached(ArmorAuraAttachments.SNOUT_TIER)) {
+				sawTier[0] = true;
+			}
+		});
+		// Every tier ends with the attachment consumed: barter throw for lucky and extra lucky,
+		// death drop for super duper lucky.
+		helper.succeedWhen(() -> {
+			helper.assertTrue(sawTier[0], "piglin never picked up the gold");
+			helper.assertFalse(piglin.hasAttached(ArmorAuraAttachments.SNOUT_TIER),
+					"tier attachment not cleared after the trade resolved");
+		});
+	}
+
+	// Drops a gold ingot at the piglin's feet, attributed to the thrower like a real Q drop.
+	private static void throwGold(GameTestHelper helper, ServerPlayer thrower) {
+		ItemEntity gold = helper.spawnItem(Items.GOLD_INGOT, new Vec3(4.5, 1.0, 4.5));
+		gold.setThrower(thrower);
 	}
 
 	private static ServerPlayer spawnPlayer(GameTestHelper helper, boolean snoutTrim) {

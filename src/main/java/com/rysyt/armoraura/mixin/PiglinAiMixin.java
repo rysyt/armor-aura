@@ -1,6 +1,7 @@
 package com.rysyt.armoraura.mixin;
 
-import com.rysyt.armoraura.ArmorAura;
+import com.rysyt.armoraura.ArmorAuraAttachments;
+import com.rysyt.armoraura.SnoutTier;
 import com.rysyt.armoraura.TrimChecker;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,13 +53,13 @@ public class PiglinAiMixin {
 		if (owner instanceof ServerPlayer player && TrimChecker.checkTrim(player, "snout")) {
 			int roll = piglin.getRandom().nextInt(100);
 			if (roll < 1) {
-				ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.add(piglin.getUUID());
+				piglin.setAttached(ArmorAuraAttachments.SNOUT_TIER, SnoutTier.SUPER_LUCKY);
 				player.sendOverlayMessage(Component.literal("Super Duper Lucky Trade!"));
 			} else if (roll < 25) {
-				ArmorAura.SNOUT_EXTRA_LUCKY_PIGLINS.add(piglin.getUUID());
+				piglin.setAttached(ArmorAuraAttachments.SNOUT_TIER, SnoutTier.EXTRA_LUCKY);
 				player.sendOverlayMessage(Component.literal("Extra Lucky Trade!"));
 			} else {
-				ArmorAura.SNOUT_LUCKY_PIGLINS.add(piglin.getUUID());
+				piglin.setAttached(ArmorAuraAttachments.SNOUT_TIER, SnoutTier.LUCKY);
 				player.sendOverlayMessage(Component.literal("Lucky Trade!"));
 			}
 		}
@@ -68,7 +69,8 @@ public class PiglinAiMixin {
 	// Super duper lucky also triggers the zombie villager conversion shake (entity event 16).
 	@Inject(method = "admireGoldItem", at = @At("HEAD"), cancellable = true)
 	private static void extendAdmiration(LivingEntity entity, CallbackInfo ci) {
-		if (ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.contains(entity.getUUID())) {
+		SnoutTier tier = entity.getAttached(ArmorAuraAttachments.SNOUT_TIER);
+		if (tier == SnoutTier.SUPER_LUCKY) {
 			entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, 269L);
 			entity.level().broadcastEntityEvent(entity, (byte) 16);
 			entity.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 229, 1));
@@ -79,10 +81,10 @@ public class PiglinAiMixin {
 				drops.addAll(rollSnoutTable((Piglin) entity));
 				drops.add(randomRareItem(entity.getRandom()));
 			}
-			ArmorAura.SNOUT_SUPER_LUCKY_DROPS.put(entity.getUUID(), drops);
+			entity.setAttached(ArmorAuraAttachments.SUPER_LUCKY_DROPS, drops);
 			ci.cancel();
 			// isConverting() is overridden in AbstractPiglinMixin to drive the shake renderer
-		} else if (ArmorAura.SNOUT_EXTRA_LUCKY_PIGLINS.contains(entity.getUUID())) {
+		} else if (tier == SnoutTier.EXTRA_LUCKY) {
 			entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, 179L);
 			ci.cancel();
 		}
@@ -92,16 +94,17 @@ public class PiglinAiMixin {
 	// Select the loot table based on tier. Super duper lucky rolls 5 times and kills the piglin.
 	@Inject(method = "getBarterResponseItems", at = @At("HEAD"), cancellable = true)
 	private static void tieredBarterItems(Piglin piglin, CallbackInfoReturnable<List<ItemStack>> cir) {
-		if (ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.remove(piglin.getUUID())) {
+		SnoutTier tier = piglin.removeAttached(ArmorAuraAttachments.SNOUT_TIER);
+		if (tier == SnoutTier.SUPER_LUCKY) {
 			// Items pre-rolled at admiration start and stored for death drop; suppress the throw
 			cir.setReturnValue(List.of());
 
-		} else if (ArmorAura.SNOUT_EXTRA_LUCKY_PIGLINS.remove(piglin.getUUID())) {
+		} else if (tier == SnoutTier.EXTRA_LUCKY) {
 			List<ItemStack> items = new ArrayList<>(rollSnoutTable(piglin));
 			items.add(randomRareItem(piglin.getRandom()));
 			cir.setReturnValue(items);
 
-		} else if (ArmorAura.SNOUT_LUCKY_PIGLINS.remove(piglin.getUUID())) {
+		} else if (tier == SnoutTier.LUCKY) {
 			cir.setReturnValue(rollTable(piglin, "piglin_bartering_lucky"));
 		}
 	}
