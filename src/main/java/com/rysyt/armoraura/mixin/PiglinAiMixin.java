@@ -31,9 +31,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.util.RandomSource;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Mixin(PiglinAi.class)
 public class PiglinAiMixin {
@@ -46,12 +47,12 @@ public class PiglinAiMixin {
         }
     }
 
-    // Roll the trade tier at pickup — the only moment the throwing player is reachable.
+    // Roll the trade tier at pickup, the only moment the throwing player is reachable.
     @Inject(method = "pickUpItem", at = @At("HEAD"))
     private static void onPickUpItem(ServerLevel level, Piglin piglin, ItemEntity itemEntity, CallbackInfo ci) {
         Entity owner = itemEntity.getOwner();
         if (owner instanceof ServerPlayer player && TrimChecker.checkTrim(player, "snout")) {
-            int roll = new Random().nextInt(100);
+            int roll = piglin.getRandom().nextInt(100);
             if (roll < 1) {
                 ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.add(piglin.getUUID());
                 player.sendOverlayMessage(Component.literal("Super Duper Lucky Trade!"));
@@ -74,11 +75,11 @@ public class PiglinAiMixin {
             entity.level().broadcastEntityEvent(entity, (byte) 16);
             entity.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 229, 1));
             entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 269, 0));
-            // Pre-roll drops now — piglin will likely land before admiration ends so getBarterResponseItems may never fire
+            // Pre-roll drops now; the piglin will likely land before admiration ends so getBarterResponseItems may never fire
             List<ItemStack> drops = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
                 drops.addAll(rollSnoutTable((Piglin) entity));
-                drops.add(randomRareItem());
+                drops.add(randomRareItem(entity.getRandom()));
             }
             ArmorAura.SNOUT_SUPER_LUCKY_DROPS.put(entity.getUUID(), drops);
             ci.cancel();
@@ -87,19 +88,19 @@ public class PiglinAiMixin {
             entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, 179L);
             ci.cancel();
         }
-        // Lucky tier uses vanilla 119L — no override needed
+        // Lucky tier uses vanilla 119L, no override needed
     }
 
     // Select the loot table based on tier. Super duper lucky rolls 5 times and kills the piglin.
     @Inject(method = "getBarterResponseItems", at = @At("HEAD"), cancellable = true)
     private static void tieredBarterItems(Piglin piglin, CallbackInfoReturnable<List<ItemStack>> cir) {
         if (ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.remove(piglin.getUUID())) {
-            // Items pre-rolled at admiration start and stored for death drop — suppress the throw
+            // Items pre-rolled at admiration start and stored for death drop; suppress the throw
             cir.setReturnValue(List.of());
 
         } else if (ArmorAura.SNOUT_EXTRA_LUCKY_PIGLINS.remove(piglin.getUUID())) {
             List<ItemStack> items = new ArrayList<>(rollSnoutTable(piglin));
-            items.add(randomRareItem());
+            items.add(randomRareItem(piglin.getRandom()));
             cir.setReturnValue(items);
 
         } else if (ArmorAura.SNOUT_LUCKY_PIGLINS.remove(piglin.getUUID())) {
@@ -125,8 +126,7 @@ public class PiglinAiMixin {
     }
 
     // Returns a random rare item as a guaranteed bonus drop.
-    private static ItemStack randomRareItem() {
-        Random rng = new Random();
+    private static ItemStack randomRareItem(RandomSource rng) {
         return switch (rng.nextInt(7)) {
             case 0 -> new ItemStack(Items.ENDER_PEARL, 2 + rng.nextInt(3));
             case 1 -> {
