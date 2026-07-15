@@ -1,5 +1,6 @@
 plugins {
 	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'com.diffplug.spotless' version '8.1.0'
 	id 'maven-publish'
 }
 
@@ -24,6 +25,24 @@ loom {
 		}
 	}
 
+}
+
+// Mirrors .editorconfig: tabs, LF, trimmed trailing whitespace, final newline
+spotless {
+	java {
+		target 'src/*/java/**/*.java'
+		leadingSpacesToTabs(4)
+		trimTrailingWhitespace()
+		endWithNewline()
+		importOrder()
+		removeUnusedImports()
+	}
+	format 'json', {
+		target 'src/main/resources/**/*.json'
+		leadingSpacesToTabs(2)
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
 }
 
 dependencies {
