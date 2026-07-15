@@ -6,6 +6,18 @@ A Fabric mod that adds passive effects and buffs based on the armor trims you're
 
 ## Trim Effects
 
+### Eye Trim
+
+Equip the eye trim on any piece of armor to look endermen in the eye safely.
+
+---
+
+**Enderman Stare Immunity**
+
+Endermen never register your stare: no aggro, no scream, and no creepy stance from eye contact. Attacking one still provokes it like normal.
+
+---
+
 ### Snout Trim
 
 Equip the snout trim on any piece of armor to unlock piglin-related effects.
