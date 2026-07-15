@@ -1,6 +1,6 @@
 package com.rysyt.armoraura.mixin;
 
-import com.rysyt.armoraura.ArmorAura;
+import com.rysyt.armoraura.ArmorAuraAttachments;
 import java.util.List;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -19,7 +19,7 @@ public class LivingEntityMixin {
 	@Inject(method = "causeFallDamage", at = @At("HEAD"), cancellable = true)
 	private void forceDeathOnFall(double fallDistance, float damageModifier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		if (fallDistance > 0 && ArmorAura.SNOUT_SUPER_LUCKY_DROPS.containsKey(self.getUUID())) {
+		if (fallDistance > 0 && self.hasAttached(ArmorAuraAttachments.SUPER_LUCKY_DROPS)) {
 			if (self.level() instanceof ServerLevel serverLevel) {
 				self.kill(serverLevel);
 				cir.setReturnValue(true);
@@ -31,8 +31,8 @@ public class LivingEntityMixin {
 	@Inject(method = "die", at = @At("HEAD"))
 	private void onDie(DamageSource source, CallbackInfo ci) {
 		LivingEntity self = (LivingEntity) (Object) this;
-		List<ItemStack> drops = ArmorAura.SNOUT_SUPER_LUCKY_DROPS.remove(self.getUUID());
-		ArmorAura.SNOUT_SUPER_LUCKY_PIGLINS.remove(self.getUUID());
+		List<ItemStack> drops = self.removeAttached(ArmorAuraAttachments.SUPER_LUCKY_DROPS);
+		self.removeAttached(ArmorAuraAttachments.SNOUT_TIER);
 		if (drops != null && self.level() instanceof ServerLevel serverLevel) {
 			for (ItemStack stack : drops) {
 				self.spawnAtLocation(serverLevel, stack);
