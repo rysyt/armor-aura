@@ -7,11 +7,13 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -27,7 +29,7 @@ public class ArmorAuraGameTests {
 
 	@GameTest(maxTicks = 200)
 	public void snoutTrimBlocksPiglinTargeting(GameTestHelper helper) {
-		ServerPlayer player = spawnPlayer(helper, true);
+		ServerPlayer player = spawnPlayer(helper, TrimPatterns.SNOUT);
 		Piglin piglin = spawnPiglin(helper);
 		helper.runAfterDelay(100, () -> {
 			helper.assertFalse(
@@ -41,7 +43,7 @@ public class ArmorAuraGameTests {
 	// Control: without the trim the same setup must produce aggro, proving the harness detects it.
 	@GameTest(maxTicks = 200)
 	public void piglinTargetsPlayerWithoutTrim(GameTestHelper helper) {
-		spawnPlayer(helper, false);
+		spawnPlayer(helper, null);
 		Piglin piglin = spawnPiglin(helper);
 		helper.runAfterDelay(100, () -> {
 			helper.assertTrue(
@@ -53,7 +55,7 @@ public class ArmorAuraGameTests {
 
 	@GameTest(maxTicks = 400)
 	public void goldPickupSetsTierAttachment(GameTestHelper helper) {
-		ServerPlayer player = spawnPlayer(helper, true);
+		ServerPlayer player = spawnPlayer(helper, TrimPatterns.SNOUT);
 		Piglin piglin = spawnPiglin(helper);
 		throwGold(helper, player);
 		helper.succeedWhen(() -> helper.assertTrue(
@@ -63,7 +65,7 @@ public class ArmorAuraGameTests {
 
 	@GameTest(maxTicks = 600)
 	public void tierAttachmentClearsWhenTradeResolves(GameTestHelper helper) {
-		ServerPlayer player = spawnPlayer(helper, true);
+		ServerPlayer player = spawnPlayer(helper, TrimPatterns.SNOUT);
 		Piglin piglin = spawnPiglin(helper);
 		throwGold(helper, player);
 		boolean[] sawTier = new boolean[1];
@@ -81,20 +83,69 @@ public class ArmorAuraGameTests {
 		});
 	}
 
+	@GameTest(maxTicks = 300)
+	public void eyeTrimBlocksEndermanStareAggro(GameTestHelper helper) {
+		ServerPlayer player = spawnPlayer(helper, TrimPatterns.EYE);
+		EnderMan enderman = spawnEnderman(helper);
+		stareAt(helper, player, enderman);
+		helper.runAfterDelay(150, () -> {
+			helper.assertFalse(enderman.hasBeenStaredAt(),
+					"enderman registered a stare from an eye trim wearer");
+			helper.assertTrue(enderman.getTarget() == null,
+					"enderman targeted an eye trim wearer for staring");
+			helper.succeed();
+		});
+	}
+
+	// Control: the same stare without the trim must anger the enderman.
+	@GameTest(maxTicks = 300)
+	public void endermanAngersAtStareWithoutTrim(GameTestHelper helper) {
+		ServerPlayer player = spawnPlayer(helper, null);
+		EnderMan enderman = spawnEnderman(helper);
+		stareAt(helper, player, enderman);
+		boolean[] angered = new boolean[1];
+		helper.onEachTick(() -> {
+			if (enderman.getTarget() == player || enderman.hasBeenStaredAt()) {
+				angered[0] = true;
+			}
+		});
+		helper.succeedWhen(() -> helper.assertTrue(angered[0],
+				"enderman never angered at a stare from a player with no trim"));
+	}
+
+	// Points the mock player's view at the enderman's eyes every tick. The vanilla stare
+	// check needs the view vector within a fraction of a degree, so aim is recomputed as
+	// the enderman moves.
+	private static void stareAt(GameTestHelper helper, ServerPlayer player, EnderMan enderman) {
+		helper.onEachTick(() -> {
+			Vec3 toEyes = enderman.getEyePosition().subtract(player.getEyePosition());
+			double horizontal = Math.sqrt(toEyes.x * toEyes.x + toEyes.z * toEyes.z);
+			float yaw = (float) Math.toDegrees(Math.atan2(-toEyes.x, toEyes.z));
+			float pitch = (float) -Math.toDegrees(Math.atan2(toEyes.y, horizontal));
+			player.snapTo(player.getX(), player.getY(), player.getZ(), yaw, pitch);
+			// The view vector reads head rotation, which snapTo does not touch.
+			player.setYHeadRot(yaw);
+		});
+	}
+
+	private static EnderMan spawnEnderman(GameTestHelper helper) {
+		return helper.spawn(EntityType.ENDERMAN, new BlockPos(5, 1, 5));
+	}
+
 	// Drops a gold ingot at the piglin's feet, attributed to the thrower like a real Q drop.
 	private static void throwGold(GameTestHelper helper, ServerPlayer thrower) {
 		ItemEntity gold = helper.spawnItem(Items.GOLD_INGOT, new Vec3(4.5, 1.0, 4.5));
 		gold.setThrower(thrower);
 	}
 
-	private static ServerPlayer spawnPlayer(GameTestHelper helper, boolean snoutTrim) {
+	private static ServerPlayer spawnPlayer(GameTestHelper helper, ResourceKey<TrimPattern> trim) {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		// The test server world defaults to creative, which mobs never target.
 		player.setGameMode(GameType.SURVIVAL);
 		Vec3 pos = helper.absoluteVec(new Vec3(1.5, 1.0, 1.5));
 		player.snapTo(pos.x, pos.y, pos.z, 0.0F, 0.0F);
-		if (snoutTrim) {
-			player.setItemSlot(EquipmentSlot.CHEST, snoutTrimmedChestplate(helper));
+		if (trim != null) {
+			player.setItemSlot(EquipmentSlot.CHEST, trimmedChestplate(helper, trim));
 		}
 		return player;
 	}
@@ -106,9 +157,9 @@ public class ArmorAuraGameTests {
 		return piglin;
 	}
 
-	private static ItemStack snoutTrimmedChestplate(GameTestHelper helper) {
+	private static ItemStack trimmedChestplate(GameTestHelper helper, ResourceKey<TrimPattern> trim) {
 		Holder<TrimPattern> pattern = helper.getLevel().registryAccess()
-				.lookupOrThrow(Registries.TRIM_PATTERN).getOrThrow(TrimPatterns.SNOUT);
+				.lookupOrThrow(Registries.TRIM_PATTERN).getOrThrow(trim);
 		Holder<TrimMaterial> material = helper.getLevel().registryAccess()
 				.lookupOrThrow(Registries.TRIM_MATERIAL).getOrThrow(TrimMaterials.REDSTONE);
 		ItemStack chestplate = new ItemStack(Items.IRON_CHESTPLATE);
