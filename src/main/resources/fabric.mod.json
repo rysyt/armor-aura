@@ -20,17 +20,10 @@
 		],
 		"client": [
 			"com.rysyt.armoraura.client.ArmorAuraClient"
-		],
-		"fabric-datagen": [
-			"com.rysyt.armoraura.client.ArmorAuraDataGenerator"
 		]
 	},
 	"mixins": [
-		"armor_aura.mixins.json",
-		{
-			"config": "armor_aura.client.mixins.json",
-			"environment": "client"
-		}
+		"armor_aura.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.19.2",
