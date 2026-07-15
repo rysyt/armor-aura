@@ -1,5 +1,7 @@
 # ArmorAura
 
+[![build](https://github.com/rysyt/armor-aura/actions/workflows/build.yml/badge.svg)](https://github.com/rysyt/armor-aura/actions/workflows/build.yml)
+
 A Fabric mod that adds passive effects and buffs based on the armor trims you're wearing.
 
 ## Trim Effects
