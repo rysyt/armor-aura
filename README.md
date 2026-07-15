@@ -30,6 +30,8 @@ When you throw a gold ingot at a piglin while wearing the snout trim, the trade 
 
 Without the snout trim, bartering is 100% vanilla, no changes whatsoever.
 
+The percentages, admiration durations, and Super Duper Lucky roll count above are defaults; they can be changed in `config/armor_aura.json` (generated on first launch).
+
 ---
 
 **Lucky Trade (75%)**

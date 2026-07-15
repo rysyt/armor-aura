@@ -31,13 +31,12 @@ bin/
 
 run/
 
-# claude
-
-.claude/
-
 # java
 
 hs_err_*.log
 replay_*.log
 *.hprof
 *.jfr
+
+# fabric-loader-junit writes here during unit tests
+logs/

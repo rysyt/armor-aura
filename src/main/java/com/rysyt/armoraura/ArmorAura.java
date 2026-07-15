@@ -11,6 +11,7 @@ public class ArmorAura implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		ArmorAuraConfig.load();
 		ArmorAuraAttachments.init();
 	}
 }
