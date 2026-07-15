@@ -1,0 +1,16 @@
+{
+	"schemaVersion": 1,
+	"id": "armor_aura_gametest",
+	"version": "1.0.0",
+	"name": "ArmorAura Game Tests",
+	"license": "CC0-1.0",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"com.rysyt.armoraura.gametest.ArmorAuraGameTests"
+		]
+	},
+	"depends": {
+		"armor_aura": "*"
+	}
+}
