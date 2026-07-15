@@ -3,7 +3,6 @@
 	"package": "com.rysyt.armoraura.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"ExampleMixin",
 		"AbstractPiglinMixin",
 		"LivingEntityMixin",
 		"PiglinAiMixin"
