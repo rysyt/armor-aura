@@ -1,6 +1,7 @@
 package com.rysyt.armoraura.mixin;
 
 import com.rysyt.armoraura.ArmorAuraAttachments;
+import com.rysyt.armoraura.ArmorAuraConfig;
 import com.rysyt.armoraura.SnoutTier;
 import com.rysyt.armoraura.TrimChecker;
 import java.util.ArrayList;
@@ -51,11 +52,12 @@ public class PiglinAiMixin {
 	private static void onPickUpItem(ServerLevel level, Piglin piglin, ItemEntity itemEntity, CallbackInfo ci) {
 		Entity owner = itemEntity.getOwner();
 		if (owner instanceof ServerPlayer player && TrimChecker.checkTrim(player, "snout")) {
+			ArmorAuraConfig config = ArmorAuraConfig.get();
 			int roll = piglin.getRandom().nextInt(100);
-			if (roll < 1) {
+			if (roll < config.superLuckyPercent) {
 				piglin.setAttached(ArmorAuraAttachments.SNOUT_TIER, SnoutTier.SUPER_LUCKY);
 				player.sendOverlayMessage(Component.literal("Super Duper Lucky Trade!"));
-			} else if (roll < 25) {
+			} else if (roll < config.superLuckyPercent + config.extraLuckyPercent) {
 				piglin.setAttached(ArmorAuraAttachments.SNOUT_TIER, SnoutTier.EXTRA_LUCKY);
 				player.sendOverlayMessage(Component.literal("Extra Lucky Trade!"));
 			} else {
@@ -70,14 +72,16 @@ public class PiglinAiMixin {
 	@Inject(method = "admireGoldItem", at = @At("HEAD"), cancellable = true)
 	private static void extendAdmiration(LivingEntity entity, CallbackInfo ci) {
 		SnoutTier tier = entity.getAttached(ArmorAuraAttachments.SNOUT_TIER);
+		ArmorAuraConfig config = ArmorAuraConfig.get();
 		if (tier == SnoutTier.SUPER_LUCKY) {
-			entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, 269L);
+			entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, config.superLuckyAdmireTicks);
 			entity.level().broadcastEntityEvent(entity, (byte) 16);
-			entity.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 229, 1));
-			entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 269, 0));
+			// Levitation ends 40 ticks early so the piglin lands and dies before admiration expires
+			entity.addEffect(new MobEffectInstance(MobEffects.LEVITATION, Math.max(1, config.superLuckyAdmireTicks - 40), 1));
+			entity.addEffect(new MobEffectInstance(MobEffects.GLOWING, config.superLuckyAdmireTicks, 0));
 			// Pre-roll drops now; the piglin will likely land before admiration ends so getBarterResponseItems may never fire
 			List<ItemStack> drops = new ArrayList<>();
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < config.superLuckyRolls; i++) {
 				drops.addAll(rollSnoutTable((Piglin) entity));
 				drops.add(randomRareItem(entity.getRandom()));
 			}
@@ -85,7 +89,7 @@ public class PiglinAiMixin {
 			ci.cancel();
 			// isConverting() is overridden in AbstractPiglinMixin to drive the shake renderer
 		} else if (tier == SnoutTier.EXTRA_LUCKY) {
-			entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, 179L);
+			entity.getBrain().setMemoryWithExpiry(MemoryModuleType.ADMIRING_ITEM, true, config.extraLuckyAdmireTicks);
 			ci.cancel();
 		}
 		// Lucky tier uses vanilla 119L, no override needed
