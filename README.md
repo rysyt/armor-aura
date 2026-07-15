@@ -16,7 +16,7 @@ Piglins will not attack you, even without golden armor. The snout trim signals t
 
 ---
 
-**Piglin Bartering — Three-Tier Trade System**
+**Piglin Bartering: Three-Tier Trade System**
 
 When you throw a gold ingot at a piglin while wearing the snout trim, the trade is upgraded. The tier is rolled the moment the piglin picks up the gold:
 
@@ -26,13 +26,13 @@ When you throw a gold ingot at a piglin while wearing the snout trim, the trade 
 | Extra Lucky Trade | 24% | "Extra Lucky Trade!" |
 | Super Duper Lucky Trade | 1% | "Super Duper Lucky Trade!" |
 
-Without the snout trim, bartering is 100% vanilla — no changes whatsoever.
+Without the snout trim, bartering is 100% vanilla, no changes whatsoever.
 
 ---
 
 **Lucky Trade (75%)**
 
-- Uses a boosted loot table — all rare items have doubled weight vs vanilla
+- Uses a boosted loot table: all rare items have doubled weight vs vanilla
 - Junk items removed: no crying obsidian, leather, soul sand, nether brick, or blackstone
 - Admiration time: vanilla (~6 seconds)
 
@@ -42,7 +42,7 @@ Possible drops (no junk): Soul Speed book, Soul Speed iron boots, fire resistanc
 
 **Extra Lucky Trade (24%)**
 
-- Uses a further boosted loot table — rare items at 4x vanilla weight
+- Uses a further boosted loot table: rare items at 4x vanilla weight
 - Same junk items removed as Lucky Trade
 - Admiration time: ~9 seconds (50% longer than vanilla)
 - Guaranteed bonus rare item on top of the random roll (randomly one of: ender pearls, fire resistance potion, dried ghast, diamond, or iron nuggets)
@@ -53,15 +53,32 @@ Possible drops (no junk): Soul Speed book, Soul Speed iron boots, fire resistanc
 
 - Piglin shakes during admiration
 - Admiration time: ~13 seconds (50% longer than Extra Lucky)
-- Gives **5 full Extra Lucky Trade results** — each roll includes the random table drop plus a guaranteed rare bonus item
+- Gives **5 full Extra Lucky Trade results**: each roll includes the random table drop plus a guaranteed rare bonus item
 - Piglin dies after trading
 
 ---
 
 ## Setup
 
-For setup instructions, please see the [Fabric Documentation page](https://docs.fabricmc.net/develop/getting-started/creating-a-project#setting-up) related to the IDE that you are using.
+Requirements:
+
+- Java 25
+- Minecraft 26.1.2
+- Fabric Loader 0.19.2 or newer
+- [Fabric API](https://modrinth.com/mod/fabric-api)
+
+Build the mod jar (written to `build/libs/`):
+
+```
+./gradlew build
+```
+
+Or launch a development client with the mod already loaded:
+
+```
+./gradlew runClient
+```
 
 ## License
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+This mod is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
